@@ -1,4 +1,5 @@
 ﻿using Communication;
+using IndustrialMonitor.common;
 using IndustrialMonitor.DAL;
 using IndustrialMonitor.Model;
 using System;
@@ -9,6 +10,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 
 namespace IndustrialMonitor.BLL
 {
@@ -44,12 +46,15 @@ namespace IndustrialMonitor.BLL
             return result;
         }
 
-        public DataResult<StorageModel> InitStorageArea()
+        /// <summary>
+        /// 初始化存储区-从数据库中读取存储区信息
+        /// </summary>
+        /// <returns></returns>
+        public DataResult<List<StorageModel>> InitStorageArea()
         {
-            DataResult<StorageModel> result = new DataResult<StorageModel>();
+            DataResult<List<StorageModel>> result = new DataResult<List<StorageModel>>();
             try
             {
-                StorageModel model = new StorageModel();
                 DataTable table = dataAccess.GetStorageArea();
                 List<StorageModel> values = (from q in table.AsEnumerable()
                                        select new StorageModel
@@ -62,13 +67,89 @@ namespace IndustrialMonitor.BLL
                                        }).ToList();
 
                 result.State = true;
-                result.Data = model;
+                result.Data = values;
             }
             catch (Exception ex)
             {
                 result.Message = ex.Message.ToString();
             }
 
+
+            return result;
+        }
+
+        public DataResult<List<DevicesModel>> InitDevices()
+        {
+            DataResult<List<DevicesModel>> result = new DataResult<List<DevicesModel>>();
+            try
+            {
+                DataTable deviceTable = dataAccess.GetDevices();
+                DataTable monitorValueTable = dataAccess.GetMonitorValues();
+                List<DevicesModel> deviceList = new List<DevicesModel>();
+
+                foreach(var q in deviceTable.AsEnumerable())
+                {
+                    DevicesModel dModel = new DevicesModel();
+                    deviceList.Add(dModel);
+                    dModel.Id = q.Field<string>("id");
+                    dModel.DeviceName = q.Field<string>("d_name");
+
+                    foreach(var mv in monitorValueTable.AsEnumerable().Where(m => m.Field<string>("d_id") == dModel.Id))
+                    {
+                        MonitorValuesModel mvm = new MonitorValuesModel();
+                        dModel.MonitorValuesList.Add(mvm);
+
+                        mvm.ValueId = mv.Field<string>("value_id");
+                        mvm.ValueName = mv.Field<string>("value_name");
+                        mvm.StorageAreaId = mv.Field<string>("s_area_id");
+                        mvm.StartAddress = mv.Field<int>("address");
+                        mvm.IsAlarm = mv.Field<bool>("is_alarm");
+                        mvm.Description = mv.Field<string>("description");
+                        mvm.Unit = mv.Field<string>("unit");
+                        // 警戒值
+                        var cloumn = mv.Field<string>("alarm_lolo");
+                        mvm.LoLoAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
+                        cloumn = mv.Field<string>("alarm_low");
+                        mvm.LowAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
+                        cloumn = mv.Field<string>("alarm_high");
+                        mvm.HighAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
+                        cloumn = mv.Field<string>("alarm_hihi");
+                        mvm.HiHiAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
+
+                        mvm.ValueStateChanged = (state, msg, valueId) =>
+                        {
+                            // 先把当前值对应的警告信息删除在添加 
+                            var index = dModel.WarngingMessageList.ToList().FindIndex(w => w.ValueId == valueId);
+                            if(index > -1) // 说明存在
+                            {
+                                dModel.WarngingMessageList.RemoveAt(index);
+                            }
+                            if (state != MonitorValueState.OK)
+                            {
+                                dModel.isWarnning = true;
+                                // 往设备中添加报警信息
+                                WarningMessageModel wmm = new WarningMessageModel() { ValueId = valueId, Message = msg };
+                                dModel.WarngingMessageList.Add(wmm);
+                                
+                            }
+                            if(dModel.WarngingMessageList.Count > 0)
+                            {
+                                dModel.isWarnning = true;
+                            }
+                            else
+                            {
+                                dModel.isWarnning = false;
+                            }
+                        };
+                    }
+                }
+                result.State = true;
+                result.Data = deviceList;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message.ToString();
+            }
 
             return result;
         }

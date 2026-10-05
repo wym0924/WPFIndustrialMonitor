@@ -89,9 +89,9 @@ namespace IndustrialMonitor.DAL
         /// 获取设备信息
         /// </summary>
         /// <returns></returns>
-        public DataTable GetDevice()
+        public DataTable GetDevices()
         {
-            string sql = "select * from device";
+            string sql = "select * from devices";
             return this.GetDatas(sql);
         }
 
