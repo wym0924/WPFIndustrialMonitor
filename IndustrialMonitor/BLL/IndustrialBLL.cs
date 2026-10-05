@@ -1,7 +1,10 @@
 ﻿using Communication;
+using IndustrialMonitor.DAL;
+using IndustrialMonitor.Model;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -11,6 +14,9 @@ namespace IndustrialMonitor.BLL
 {
     public class IndustrialBLL
     {
+        // 获取数据信息的对象 
+        DataAccess dataAccess = new DataAccess();
+
         // 获取串口信息
         public DataResult<SerialInfo> InitSerialInfo()
         {
@@ -31,11 +37,38 @@ namespace IndustrialMonitor.BLL
             }
             catch (Exception ex)
             {
-                DataResult dr = new DataResult();
-                dr.State = false;
-                dr.Message = ex.Message.ToString();
-                dr.Data = null;
+                result.State = false;
+                result.Message = ex.Message.ToString();
             }
+
+            return result;
+        }
+
+        public DataResult<StorageModel> InitStorageArea()
+        {
+            DataResult<StorageModel> result = new DataResult<StorageModel>();
+            try
+            {
+                StorageModel model = new StorageModel();
+                DataTable table = dataAccess.GetStorageArea();
+                List<StorageModel> values = (from q in table.AsEnumerable()
+                                       select new StorageModel
+                                       {
+                                           Id=q.Field<String>("id"),
+                                           SlaveAddress=q.Field<Int32>("slave_add"),
+                                           FuncCode=q.Field<string>("func_code"),
+                                           StartAddress=int.Parse(q.Field<string>("start_reg")),
+                                           Length= int.Parse(q.Field<string>("length"))
+                                       }).ToList();
+
+                result.State = true;
+                result.Data = model;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.Message.ToString();
+            }
+
 
             return result;
         }
