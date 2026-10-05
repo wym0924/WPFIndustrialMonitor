@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Communication/Communication.csproj" />
+  <Project Path="Controls/Controls.csproj" />
+  <Project Path="IndustrialMonitor/IndustrialMonitor.csproj" />
+</Solution>
