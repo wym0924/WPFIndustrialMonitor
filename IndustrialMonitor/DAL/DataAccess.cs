@@ -101,7 +101,7 @@ namespace IndustrialMonitor.DAL
         /// <returns></returns>
         public DataTable GetMonitorValues()
         {
-            string sql = "select * from monitor_values";
+            string sql = "select * from monitor_values order by d_id,value_id";
             return this.GetDatas(sql);
         }
     }
