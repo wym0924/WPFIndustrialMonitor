@@ -10,7 +10,7 @@ namespace IndustrialMonitor.Model
     public class MonitorValuesModel
     {
         // 需要新建一个委托，当需要报警时触发
-        public Action<MonitorValueState, string, stirng> ValueStateChanged; // 报警状态，消息, 当前报警值
+        public Action<MonitorValueState, string, string> ValueStateChanged; // 报警状态，消息, 当前报警值
         public string ValueId { get; set; }
         public string ValueName { get; set; }
         public string StorageAreaId { get; set; }
@@ -56,7 +56,7 @@ namespace IndustrialMonitor.Model
                         Message += "极高";
                         state = MonitorValueState.HiHi;
                     }
-                    ValueStateChanged(state, Message + "，当前值：" + value.ToString());
+                    ValueStateChanged(state, Message + "，当前值：" + value.ToString(), ValueId);
                 }
             }
         }

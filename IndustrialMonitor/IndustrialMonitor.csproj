@@ -109,6 +109,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BLL\DataResult.cs" />
+    <Compile Include="BLL\IndustrialBLL.cs" />
+    <Compile Include="common\MonitorValueState.cs" />
     <Compile Include="DAL\DataAccess.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -116,6 +119,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\DevicesModel.cs" />
+    <Compile Include="Model\MonitorValuesModel.cs" />
+    <Compile Include="Model\StorageModel.cs" />
+    <Compile Include="Model\WarningMessageModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -143,9 +150,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Model\" />
     <Folder Include="ViewModel\" />
     <Folder Include="View\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Communication\Communication.csproj">
+      <Project>{B2624D81-EB2A-4FDB-881A-345B26FA4A16}</Project>
+      <Name>Communication</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

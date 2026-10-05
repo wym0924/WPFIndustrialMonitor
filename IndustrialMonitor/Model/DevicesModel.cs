@@ -17,6 +17,6 @@ namespace IndustrialMonitor.Model
         public ObservableCollection<MonitorValuesModel> MonitorValuesList { get; set; } = new ObservableCollection<MonitorValuesModel>();
 
         // 异常值通知集合
-        public ObservableCollection<WarningMessageModel> WarngingMessageList { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<WarningMessageModel> WarngingMessageList { get; set; } = new ObservableCollection<WarningMessageModel>();
     }
 }
