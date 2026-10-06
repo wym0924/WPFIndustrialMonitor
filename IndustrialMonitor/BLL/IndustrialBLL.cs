@@ -62,8 +62,8 @@ namespace IndustrialMonitor.BLL
                                            Id=q.Field<String>("id"),
                                            SlaveAddress=q.Field<Int32>("slave_add"),
                                            FuncCode=q.Field<string>("func_code"),
-                                           StartAddress=int.Parse(q.Field<string>("start_reg")),
-                                           Length= int.Parse(q.Field<string>("length"))
+                                           StartAddress=q.Field<Int32>("start_reg"),
+                                           Length= q.Field<Int32>("length")
                                        }).ToList();
 
                 result.State = true;
@@ -91,7 +91,7 @@ namespace IndustrialMonitor.BLL
                 {
                     DevicesModel dModel = new DevicesModel();
                     deviceList.Add(dModel);
-                    dModel.Id = q.Field<string>("id");
+                    dModel.Id = q.Field<string>("d_id");
                     dModel.DeviceName = q.Field<string>("d_name");
 
                     foreach(var mv in monitorValueTable.AsEnumerable().Where(m => m.Field<string>("d_id") == dModel.Id))
@@ -103,18 +103,21 @@ namespace IndustrialMonitor.BLL
                         mvm.ValueName = mv.Field<string>("value_name");
                         mvm.StorageAreaId = mv.Field<string>("s_area_id");
                         mvm.StartAddress = mv.Field<int>("address");
-                        mvm.IsAlarm = mv.Field<bool>("is_alarm");
+                        mvm.IsAlarm = mv.Field<int>("is_alarm") != 1;
                         mvm.Description = mv.Field<string>("description");
                         mvm.Unit = mv.Field<string>("unit");
                         // 警戒值
-                        var cloumn = mv.Field<string>("alarm_lolo");
-                        mvm.LoLoAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
-                        cloumn = mv.Field<string>("alarm_low");
-                        mvm.LowAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
-                        cloumn = mv.Field<string>("alarm_high");
-                        mvm.HighAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
-                        cloumn = mv.Field<string>("alarm_hihi");
-                        mvm.HiHiAlarm = cloumn == null ? 0.0 : double.Parse(cloumn);
+                        var cloumn = mv.Field<Single?>("alarm_lolo");
+                        mvm.LoLoAlarm = cloumn.HasValue ? Convert.ToDouble(cloumn.Value) : 0.0;
+
+                        cloumn = mv.Field<Single?>("alarm_low");
+                        mvm.LowAlarm = cloumn.HasValue ? Convert.ToDouble(cloumn.Value) : 0.0;
+
+                        cloumn = mv.Field<Single?>("alarm_high");
+                        mvm.HighAlarm = cloumn.HasValue ? Convert.ToDouble(cloumn.Value) : 0.0;
+
+                        cloumn = mv.Field<Single?>("alarm_hihi");
+                        mvm.HiHiAlarm = cloumn.HasValue ? Convert.ToDouble(cloumn.Value) : 0.0; ;
 
                         mvm.ValueStateChanged = (state, msg, valueId) =>
                         {
