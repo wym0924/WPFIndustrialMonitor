@@ -25,7 +25,7 @@ namespace IndustrialMonitor
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         // 需要在UI线程中进行
-                        new Window().Show();
+                        new MainWindow().Show();
                     });
                     
                 },

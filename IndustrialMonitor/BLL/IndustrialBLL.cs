@@ -10,6 +10,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Media3D;
 
 namespace IndustrialMonitor.BLL
@@ -121,28 +122,39 @@ namespace IndustrialMonitor.BLL
 
                         mvm.ValueStateChanged = (state, msg, valueId) =>
                         {
-                            // 先把当前值对应的警告信息删除在添加 
-                            var index = dModel.WarngingMessageList.ToList().FindIndex(w => w.ValueId == valueId);
-                            if(index > -1) // 说明存在
-                            {
-                                dModel.WarngingMessageList.RemoveAt(index);
+                            try
+                            {   // 数据绑定时会报错，非调度线程的线程不允许修改 ObservableCollection. 需要利用当前线程来进行操作
+                                Application.Current?.Dispatcher.Invoke(()=>{
+                                    // 先把当前值对应的警告信息删除在添加 
+                                    var index = dModel.WarngingMessageList.ToList().FindIndex(w => w.ValueId == valueId);
+                                    if (index > -1) // 说明存在
+                                    {
+                                        dModel.WarngingMessageList.RemoveAt(index);
+                                    }
+                                    if (state != MonitorValueState.OK)
+                                    {
+                                        dModel.isWarnning = true;
+                                        // 往设备中添加报警信息
+                                        WarningMessageModel wmm = new WarningMessageModel() { ValueId = valueId, Message = msg };
+                                        dModel.WarngingMessageList.Add(wmm);
+
+                                    }
+                                    
+                                });
+
+                                if (dModel.WarngingMessageList.Count > 0)
+                                {
+                                    dModel.isWarnning = true;
+                                }
+                                else
+                                {
+                                    dModel.isWarnning = false;
+                                }
+
                             }
-                            if (state != MonitorValueState.OK)
-                            {
-                                dModel.isWarnning = true;
-                                // 往设备中添加报警信息
-                                WarningMessageModel wmm = new WarningMessageModel() { ValueId = valueId, Message = msg };
-                                dModel.WarngingMessageList.Add(wmm);
-                                
-                            }
-                            if(dModel.WarngingMessageList.Count > 0)
-                            {
-                                dModel.isWarnning = true;
-                            }
-                            else
-                            {
-                                dModel.isWarnning = false;
-                            }
+                            catch
+                            { }
+                            
                         };
                     }
                 }

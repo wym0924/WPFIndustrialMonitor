@@ -20,9 +20,29 @@ namespace IndustrialMonitor
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        
+        
+
+        //Window_MouseMove
+        public void Window_mouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                // 让窗口跟随鼠标移动
+                this.DragMove();
+            }
+      
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
